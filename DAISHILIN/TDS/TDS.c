@@ -31,9 +31,8 @@ void TDS_Init(void)
     
     printf("TDS水质检测初始化成功\r\n");
     
-    DSL.Start +=20;
-    Usart3Printf("TDS水质检测初始化成功\r\n");
-    
+    DSL.Start +=10;
+    Usart3Printf("t0.txt=\"TDS水质检测初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF",DSL.Start);
     
     HAL_Delay(500);
 }

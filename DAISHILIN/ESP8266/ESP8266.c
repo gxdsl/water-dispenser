@@ -32,6 +32,7 @@ void ESP8266_Init(void)
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT响应成功\r\n");
 	printf("AT响应成功\r\n");
+    
 	while(ESP8266_SendCMD("AT+CWMODE=1\r\n", "OK"))
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CWMODE响应成功\r\n"); 
@@ -47,7 +48,7 @@ void ESP8266_Init(void)
 //	UsartPrintf(&ESP_DebugUsart,"AT+CWJAP响应成功\r\n");
     printf("AT+CWJAP响应成功\r\n");
 	
-	while(ESP8266_SendCMD(WIFI_IPAdder_IPPort, "CONNECT"));
+	while(ESP8266_SendCMD(WIFI_IPAdder_IPPort, "CONNECT"))
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CIPSTART响应成功\r\n");
     printf("AT+CIPSTART响应成功\r\n");
@@ -55,7 +56,7 @@ void ESP8266_Init(void)
     printf("ESP8266初始化成功\r\n");
     
     DSL.Start +=20;
-    Usart3Printf("ESP8266初始化成功\r\n");
+    Usart3Printf("t0.txt=\"ESP8266初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF",DSL.Start);
     
 	HAL_Delay(500);
 }

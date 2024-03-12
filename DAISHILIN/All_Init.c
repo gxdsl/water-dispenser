@@ -39,9 +39,9 @@ void ALL_Init(void)
     
     TDS_Init();
     
-    ESP8266_Init();
-    
     Ds18b20_Init();
+    
+    ESP8266_Init();
     
     PCD_Init();
     
@@ -53,8 +53,8 @@ void LoRa_Init(void)
 {
     printf("LoRa初始化成功\r\n");
     
-    DSL.Start +=20;
-    Usart3Printf("LoRa初始化成功\r\n");
+    DSL.Start = 100;
+    Usart3Printf("t0.txt=\"LoRa初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
     
     HAL_Delay(500);
 }

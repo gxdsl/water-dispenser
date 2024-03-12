@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../DAISHILIN/Usart;../DAISHILIN;../DAISHILIN/ESP8266;../DAISHILIN/DS18B20;../DAISHILIN/TDS;../DAISHILIN/RC522;../DAISHILIN/YFS401</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;../DAISHILIN/Usart;../DAISHILIN;../DAISHILIN/ESP8266;../DAISHILIN/DS18B20;../DAISHILIN/TDS;../DAISHILIN/RC522;../DAISHILIN/YFS401;..\DAISHILIN\cJSON</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1072,6 +1072,16 @@
               <FileName>YFS401.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DAISHILIN\YFS401\YFS401.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cJSON</GroupName>
+          <Files>
+            <File>
+              <FileName>cJSON.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DAISHILIN\cJSON\cJSON.c</FilePath>
             </File>
           </Files>
         </Group>

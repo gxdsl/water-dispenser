@@ -100,17 +100,34 @@ const osThreadAttr_t myTask05_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for myTask06 */
-osThreadId_t myTask06Handle;
-const osThreadAttr_t myTask06_attributes = {
-  .name = "myTask06",
+/* Definitions for HMI_Task */
+osThreadId_t HMI_TaskHandle;
+const osThreadAttr_t HMI_Task_attributes = {
+  .name = "HMI_Task",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow2,
+};
+/* Definitions for WiFi_Task */
+osThreadId_t WiFi_TaskHandle;
+const osThreadAttr_t WiFi_Task_attributes = {
+  .name = "WiFi_Task",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow2,
 };
 /* Definitions for Mutex_Trace */
 osMutexId_t Mutex_TraceHandle;
 const osMutexAttr_t Mutex_Trace_attributes = {
   .name = "Mutex_Trace"
+};
+/* Definitions for HMI_BinarySem */
+osSemaphoreId_t HMI_BinarySemHandle;
+const osSemaphoreAttr_t HMI_BinarySem_attributes = {
+  .name = "HMI_BinarySem"
+};
+/* Definitions for WiFi_BinarySem */
+osSemaphoreId_t WiFi_BinarySemHandle;
+const osSemaphoreAttr_t WiFi_BinarySem_attributes = {
+  .name = "WiFi_BinarySem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,7 +140,8 @@ void StartTask02(void *argument);
 void StartTask03(void *argument);
 void StartTask04(void *argument);
 void StartTask05(void *argument);
-void StartTask06(void *argument);
+void HMI_StartTask(void *argument);
+void WiFi_StartTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -161,6 +179,13 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* creation of HMI_BinarySem */
+  HMI_BinarySemHandle = osSemaphoreNew(1, 1, &HMI_BinarySem_attributes);
+
+  /* creation of WiFi_BinarySem */
+  WiFi_BinarySemHandle = osSemaphoreNew(1, 1, &WiFi_BinarySem_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -189,8 +214,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of myTask05 */
 //  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
 
-  /* creation of myTask06 */
-//  myTask06Handle = osThreadNew(StartTask06, NULL, &myTask06_attributes);
+  /* creation of HMI_Task */
+  HMI_TaskHandle = osThreadNew(HMI_StartTask, NULL, &HMI_Task_attributes);
+
+  /* creation of WiFi_Task */
+  WiFi_TaskHandle = osThreadNew(WiFi_StartTask, NULL, &WiFi_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -216,7 +244,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    Trace_Task();
+//    Trace_Task();
 
     osDelay(1000);
   }
@@ -284,7 +312,8 @@ void StartTask04(void *argument)
   /* Infinite loop */
   for(;;)
   {
-      osDelay(1000);
+    RC522_Amount();
+    osDelay(1000);
   }
   /* USER CODE END StartTask04 */
 }
@@ -302,29 +331,54 @@ void StartTask05(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    RC522_Amount();
+    Flow_Read();
     osDelay(1000);
   }
   /* USER CODE END StartTask05 */
 }
 
-/* USER CODE BEGIN Header_StartTask06 */
+/* USER CODE BEGIN Header_HMI_StartTask */
 /**
-* @brief Function implementing the myTask06 thread.
+* @brief Function implementing the HMI_Task thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTask06 */
-void StartTask06(void *argument)
+/* USER CODE END Header_HMI_StartTask */
+void HMI_StartTask(void *argument)
 {
-  /* USER CODE BEGIN StartTask06 */
+  /* USER CODE BEGIN HMI_StartTask */
   /* Infinite loop */
   for(;;)
   {
-    Flow_Read();
-    osDelay(1000);
+//      printf("HMI_StartTask");
+      // 当串口3接收到数据时，任务被唤醒
+      osSemaphoreAcquire(HMI_BinarySemHandle, osWaitForever);
+      
+      HMI_Handle();
+      
   }
-  /* USER CODE END StartTask06 */
+  /* USER CODE END HMI_StartTask */
+}
+
+/* USER CODE BEGIN Header_WiFi_StartTask */
+/**
+* @brief Function implementing the WiFi_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_WiFi_StartTask */
+void WiFi_StartTask(void *argument)
+{
+  /* USER CODE BEGIN WiFi_StartTask */
+  /* Infinite loop */
+  for(;;)
+  {
+      // 当WiFi接收到数据时，任务被唤醒
+      osSemaphoreAcquire(WiFi_BinarySemHandle, osWaitForever);
+      
+      WiFi_Handle();
+  }
+  /* USER CODE END WiFi_StartTask */
 }
 
 /* Private application code --------------------------------------------------*/

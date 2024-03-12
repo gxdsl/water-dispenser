@@ -41,3 +41,16 @@ dsl\usart_dsl.o: ../Core/Inc/usart.h
 dsl\usart_dsl.o: ../Core/Inc/main.h
 dsl\usart_dsl.o: D:\Program Files\Keil\ARM\ARMCC\Bin\..\include\stdarg.h
 dsl\usart_dsl.o: ../DAISHILIN/ESP8266/ESP8266.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+dsl\usart_dsl.o: ../Core/Inc/FreeRTOSConfig.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+dsl\usart_dsl.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+dsl\usart_dsl.o: ..\DAISHILIN\cJSON\cJSON.h
+dsl\usart_dsl.o: D:\Program Files\Keil\ARM\ARMCC\Bin\..\include\stdlib.h

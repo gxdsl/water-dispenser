@@ -1,20 +1,14 @@
 #ifndef __ESP8266_H
 #define __ESP8266_H
 
-//#define WIFI_Password			"AT+CWJAP=\"DSL\",\"2722945475\"\r\n"
-//#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.101.5\",9999\r\n" 
+#define WIFI_Password			"AT+CWJAP=\"DSL\",\"2722945475\"\r\n"
+#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.101.5\",9999\r\n" 
 
 //#define WIFI_Password			"AT+CWJAP=\"1002\",\"18273698235\"\r\n"
 //#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.2.103\",9999\r\n" 
 
-//#define WIFI_Password			"AT+CWJAP=\"HIKVISION_C700F8\",\"3177944670\"\r\n"
-//#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.0.195\",502\r\n"
-
-//#define WIFI_Password			"AT+CWJAP=\"643\",\"64388888\"\r\n"
-//#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.1.11\",8000\r\n" 
-
-#define WIFI_Password			"AT+CWJAP=\"ASUS\",\"1234567890\"\r\n"
-#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.100.174\",9999\r\n" 
+//#define WIFI_Password			"AT+CWJAP=\"ASUS\",\"1234567890\"\r\n"
+//#define WIFI_IPAdder_IPPort		"AT+CIPSTART=\"TCP\",\"192.168.100.174\",9999\r\n" 
 
 #define ESP_REVOK		0	//接收完成标志
 #define ESP_REVWAIT		1	//接收未完成标志
@@ -30,7 +24,7 @@
 //ESP8266结构体
 typedef struct
 {
-	unsigned char ESP_usartbuf[500];
+	unsigned char ESP_usartbuf[255];
 	unsigned char ESP_RecvCMDStat;
 	unsigned short ESP_cnt, ESP_cntPre;
 	unsigned char shuju[500];

@@ -175,7 +175,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-extern osThreadId_t myTask06Handle;
+extern osThreadId_t myTask05Handle;
 /* USER CODE END 4 */
 
 /**
@@ -203,7 +203,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         golbal_flow.receive_flag = 1;
         
         // ÈÎÎñ»Ö¸´
-        osThreadResume(myTask06Handle);
+        osThreadResume(myTask05Handle);
     }
   /* USER CODE END Callback 1 */
 }

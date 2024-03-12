@@ -1,6 +1,7 @@
 #include "DS18B20.h"
 #include "stdio.h"
 #include "Usart_dsl.h"
+#include "All_Init.h"
 
 void DQ_Write(unsigned char LEVEL_Type)
 {
@@ -247,14 +248,18 @@ void Ds18b20_Init()
     if(Ds18b20_status == 0) 
     {
         printf("DS10B20初始化成功\r\n");
-        HAL_Delay(10);
-        
-        Usart3Printf("DS10B20初始化成功\r\n");
+        HAL_Delay(100);
+
+//        Usart3Printf("t0.txt=\"DS10B20初始化成功\"\xFF\xFF\xFF");
         HAL_Delay(500);
     }
     else
     {
-        printf("DS10B20初始化失败\r\n");
+        printf("DS18B20 初始化失败\r\n");
+        HAL_Delay(100);
+        
+//        Usart3Printf("t0.txt=\"DS10B20初始化失败\"\xFF\xFF\xFF");
+        HAL_Delay(500);
     }
 }
 

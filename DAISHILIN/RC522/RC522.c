@@ -347,7 +347,7 @@ void PCD_Init(void)
     printf("RC522初始化成功\n");
     
     DSL.Start +=20;
-    Usart3Printf("RC522初始化成功\r\n");
+    Usart3Printf("t0.txt=\"RFID初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
     HAL_Delay(500);
 }
 

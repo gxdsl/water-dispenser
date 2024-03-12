@@ -39,3 +39,4 @@ dsl\ds18b20.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 dsl\ds18b20.o: ..\DAISHILIN\DS18B20\core_delay.h
 dsl\ds18b20.o: D:\Program Files\Keil\ARM\ARMCC\Bin\..\include\stdio.h
 dsl\ds18b20.o: ../DAISHILIN/Usart/Usart_dsl.h
+dsl\ds18b20.o: ../DAISHILIN/All_Init.h
