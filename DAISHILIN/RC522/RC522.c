@@ -2,9 +2,15 @@
 #include "string.h"
 #include "Usart_dsl.h"
 #include "All_Init.h"
+#include "ESP8266.h"
 
 uint8_t KeyValue[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};    // 卡A密钥
 //uint8_t KeyValue[]={'1' ,'2', '3', '4', '5', '6'};   // 卡A密钥
+
+uint8_t ucArray_ID[4];      /*先后存放IC卡的类型和UID(IC卡序列号)*/
+
+char CardID[10]; //存放卡ID
+char UserID[10]; //正在使用的用户的卡ID
 
 //三目运算符true取前面那个
 #define RS522_RST(N) HAL_GPIO_WritePin(RC522_RST_GPIO_Port, RC522_RST_Pin, N==1?GPIO_PIN_SET:GPIO_PIN_RESET)
@@ -846,11 +852,11 @@ char ReadAmount( uint8_t ucAddr, uint32_t *pData )
 * 返 回 值：无
 * 说    明：无
 ***************************************************************************************/
-uint32_t writeAmount = 100;
 void RC522_Amount(void)
 {
+    uint32_t writeAmount = 100; //初始化金额为100
+    
     uint32_t readValue;         //存放读取的金额
-    uint8_t ucArray_ID[4];      /*先后存放IC卡的类型和UID(IC卡序列号)*/
 //    char Card_ID[8];
     char cStr[30];
     
@@ -860,6 +866,8 @@ void RC522_Amount(void)
 		if(PCD_Anticoll(ucArray_ID ) == PCD_OK )
 		{
 			PCD_Select(ucArray_ID);
+            
+//            printf("%s",ucArray_ID);
 
 			PCD_AuthState( PICC_AUTHENT1A, 0x01, KeyValue, ucArray_ID );//校验密码 
             WriteAmount(0x01,writeAmount); //写入金额
@@ -889,3 +897,51 @@ void RC522_Amount(void)
 		}
 	}
 }
+
+//==============================================================================
+// @函数: void RC522_Read(void)
+// @描述: 
+// @参数: None
+// @返回: None
+// @时间: 2024.3.13
+//==============================================================================
+void RC522_Read(void)
+{
+    memset(CardID, 0x00, sizeof(CardID));     //清除读到的卡
+    
+    if(PCD_Request(PICC_REQALL,ucArray_ID) == PCD_OK)
+	{
+        /*防冲撞（当有多张卡进入读写器操作范围时，防冲突机制会从其中选择一张进行操作）*/
+		if(PCD_Anticoll(ucArray_ID ) == PCD_OK )
+		{
+			PCD_Select(ucArray_ID);
+            
+            sprintf(CardID,"%02X%02X%02X%02X",ucArray_ID[0],ucArray_ID[1],ucArray_ID[2],ucArray_ID[3]);
+			printf("The card value read is %s\r\n",CardID);  //打印读到卡片ID
+            
+            PCD_Halt(); //进入休眠状态
+        }
+    }
+    
+    if(DSL.Mode == 0 && (strcmp((const char*)CardID,"") != 0))    //读到的卡不为空
+    {
+      char card_message[50];
+      sprintf(card_message,"{\"dispenser_id\":%d,\"card\":\"%s\"}",DSL.ID,CardID);
+      ESP8266_SendData(card_message);
+    }
+    else
+    {
+      if(DSL.Mode == 1 && (strcmp((const char*)UserID,(const char*)CardID) != 0)) //如果在用户操作模式，卡值不同
+      {
+          
+          memset(UserID, 0x00, sizeof(UserID));     //清除用户卡
+          DSL.Mode = 0;     //退出用户操作模式
+          printf("Exit user operation mode\r\n");
+      }
+//      else
+//      {
+//          memset(CardID, 0x00, sizeof(CardID));     //清除本次读到的卡
+//      }
+    }
+}
+

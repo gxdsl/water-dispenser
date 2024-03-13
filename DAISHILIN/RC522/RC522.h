@@ -13,6 +13,9 @@
 //MFRC522驱动程序
 //************************************************
 
+extern char CardID[10]; //存放卡ID
+extern char UserID[10]; //正在使用的用户的卡ID
+
 /*MFRC522寄存器定义*/
 //PAGE0
 #define MFRC_RFU00              	0x00    
@@ -107,6 +110,7 @@
 /*MFRC522函数声明*/
 
 void RC522_Amount(void);
+void RC522_Read(void);
 
 void MFRC_Init(void);
 void MFRC_WriteReg(uint8_t addr, uint8_t data);

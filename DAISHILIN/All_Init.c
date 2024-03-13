@@ -12,7 +12,16 @@
 #include "RC522.h"
 #include "YFS401.h"
 
-DATA_DSL DSL = {0};   //声明结构体数据
+// 声明并初始化结构体实例 DSL
+DATA_DSL DSL =
+{
+    .Mode = 0,   //未进入用户操作模式
+    .ID = 1,     // 设备ID为1
+    .Start = 0,  // 系统初始化进度为0
+    .Tem = 0.0f, // 水温为0.0
+    .Adc = 0.0f, // TDS模块ADC的值为0.0
+    .Tds = 0.0f  // TDS水质为0.0
+};
 
 void Ds18b20_Init(void);
 void LoRa_Init(void);

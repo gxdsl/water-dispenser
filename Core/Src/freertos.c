@@ -86,13 +86,6 @@ const osThreadAttr_t myTask03_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for myTask04 */
-osThreadId_t myTask04Handle;
-const osThreadAttr_t myTask04_attributes = {
-  .name = "myTask04",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for myTask05 */
 osThreadId_t myTask05Handle;
 const osThreadAttr_t myTask05_attributes = {
@@ -113,6 +106,13 @@ const osThreadAttr_t WiFi_Task_attributes = {
   .name = "WiFi_Task",
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow2,
+};
+/* Definitions for RFID_Task */
+osThreadId_t RFID_TaskHandle;
+const osThreadAttr_t RFID_Task_attributes = {
+  .name = "RFID_Task",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for Mutex_Trace */
 osMutexId_t Mutex_TraceHandle;
@@ -138,10 +138,10 @@ const osSemaphoreAttr_t WiFi_BinarySem_attributes = {
 void StartDefaultTask(void *argument);
 void StartTask02(void *argument);
 void StartTask03(void *argument);
-void StartTask04(void *argument);
 void StartTask05(void *argument);
 void HMI_StartTask(void *argument);
 void WiFi_StartTask(void *argument);
+void RFID_StartTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -208,9 +208,6 @@ void MX_FREERTOS_Init(void) {
   /* creation of myTask03 */
   myTask03Handle = osThreadNew(StartTask03, NULL, &myTask03_attributes);
 
-  /* creation of myTask04 */
-//  myTask04Handle = osThreadNew(StartTask04, NULL, &myTask04_attributes);
-
   /* creation of myTask05 */
 //  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
 
@@ -219,6 +216,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of WiFi_Task */
   WiFi_TaskHandle = osThreadNew(WiFi_StartTask, NULL, &WiFi_Task_attributes);
+
+  /* creation of RFID_Task */
+  RFID_TaskHandle = osThreadNew(RFID_StartTask, NULL, &RFID_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -298,26 +298,6 @@ void StartTask03(void *argument)
   /* USER CODE END StartTask03 */
 }
 
-/* USER CODE BEGIN Header_StartTask04 */
-/**
-* @brief Function implementing the myTask04 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask04 */
-void StartTask04(void *argument)
-{
-  /* USER CODE BEGIN StartTask04 */
-    
-  /* Infinite loop */
-  for(;;)
-  {
-    RC522_Amount();
-    osDelay(1000);
-  }
-  /* USER CODE END StartTask04 */
-}
-
 /* USER CODE BEGIN Header_StartTask05 */
 /**
 * @brief Function implementing the myTask05 thread.
@@ -379,6 +359,25 @@ void WiFi_StartTask(void *argument)
       WiFi_Handle();
   }
   /* USER CODE END WiFi_StartTask */
+}
+
+/* USER CODE BEGIN Header_RFID_StartTask */
+/**
+* @brief Function implementing the RFID_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_RFID_StartTask */
+void RFID_StartTask(void *argument)
+{
+  /* USER CODE BEGIN RFID_StartTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    RC522_Read();
+    osDelay(1000);
+  }
+  /* USER CODE END RFID_StartTask */
 }
 
 /* Private application code --------------------------------------------------*/

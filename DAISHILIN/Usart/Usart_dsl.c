@@ -1,3 +1,4 @@
+#include "All_Init.h"
 #include "Usart_dsl.h"
 #include "stdio.h"
 #include "string.h"
@@ -5,8 +6,10 @@
 #include <stdarg.h>
 #include "ESP8266.h"
 #include "cmsis_os.h"
-#include "cJSON.h"      // 请确保 cJSON 库的头文件正确引入
+#include "cJSON.h"      // 确保cJSON库的头文件正确引入  Heap_Size EQU 0xC00
 #include <stdlib.h>
+#include <string.h>
+#include <RC522.h>
 
 extern osSemaphoreId_t HMI_BinarySemHandle;     //串口屏二值信号量
 extern osSemaphoreId_t WiFi_BinarySemHandle;    //WiFi二值信号量
@@ -31,16 +34,6 @@ uint8_t Rx3Data;
 uint8_t Uart3_RxCnt = 0;      //定义串口3接收缓冲计数
 uint8_t Rx3Buff[255];         //定义串口3数据接收缓存数组
 uint8_t Uart3TxBuf[255];      //定义串口3数据发送缓存数组
-
-// 定义一个枚举类型来表示 JSON 数据的状态
-typedef enum {
-    JSON_IDLE,      // 等待接收 JSON 数据的起始 '{'
-    JSON_RECEIVING, // 正在接收 JSON 数据
-    JSON_COMPLETE   // 已接收到完整的 JSON 数据
-} JSON_State;
-
-// 定义一个变量来表示 JSON 数据的状态
-JSON_State jsonState = JSON_IDLE;
 
 int fputc(int ch,FILE *f)
 {
@@ -179,7 +172,7 @@ void Usart2Printf(const char *format,...)
 
 //==============================================================================
 // @函数: void Usart2Printf(const char *format,...)
-// @描述: 串口2的Printf重定义 （不推荐在使用DMA的时候按照传统的方式进行重定义）
+// @描述: 串口3的Printf重定义 （不推荐在使用DMA的时候按照传统的方式进行重定义）
 // @参数: None
 // @返回: None
 // @时间: 2023.10.25
@@ -232,8 +225,8 @@ void HMI_Handle(void)
 
 
 //==============================================================================
-// @函数: WiFi_Handle
-// @描述: 处理TCP服务器发送的数据
+// @函数: void WiFi_Handle(void)
+// @描述: 解析TCP服务器发送Json数据，并执行相应功能
 // @参数: None
 // @返回: None
 // @时间: 2024.3.12
@@ -241,24 +234,17 @@ void HMI_Handle(void)
 void WiFi_Handle(void)
 {
     // 打印接收到的数据
-    printf("Received data: %s\r\n", ESP8266_struct.ESP_usartbuf);
+//    printf("Received data: %s\r\n", ESP8266_struct.ESP_usartbuf);
     
     // 在需要处理 ESP8266 数据的地方调用提取函数
     extractJsonData((const char*)ESP8266_struct.ESP_usartbuf, jsonBuffer);
     
-   // 打印接收到的 JSON 数据
-    printf("Received JSON data: %s\r\n", jsonBuffer);
-    
+//    printf("Received JSON data: %s\r\n", jsonBuffer);    // 打印接收到的 JSON 数据
     
     // 解析 JSON 数据
     cJSON *root = cJSON_Parse((const char*)jsonBuffer);
     if (root != NULL) 
     {
-        // 打印解析出的 JSON 数据
-        char *parsed_json = cJSON_Print(root);
-        printf("Parsed JSON data: %s\r\n", parsed_json);
-        free(parsed_json);
-
         // 提取 "motor" 字段的值
         cJSON *motorJson = cJSON_GetObjectItem(root, "motor");
         if (motorJson != NULL && motorJson->type == cJSON_Number) 
@@ -276,7 +262,40 @@ void WiFi_Handle(void)
                 printf("Motor status: 开\r\n");
             }
         }
-
+        else
+        {
+            // 提取 "balance" 和 "user" 字段的值
+            cJSON *balanceJson = cJSON_GetObjectItem(root, "balance");
+            cJSON *userJson = cJSON_GetObjectItem(root, "user");
+            if (balanceJson != NULL && balanceJson->type == cJSON_Number &&
+                userJson != NULL && userJson->type == cJSON_String) 
+            {
+                // 解析 "balance" 和 "user" 字段的值
+                int balanceValue = balanceJson->valueint;
+                const char* userValue = userJson->valuestring;
+                
+                // 打印 "balance" 和 "user" 字段的值
+                printf("Balance: %d, User: %s\r\n", balanceValue, userValue);
+                
+                if(strcmp((const char*)userValue, "None") == 0)
+                {
+                    printf("Unknown user\r\n");
+                }
+                else
+                {
+                    DSL.Mode = 1;   //设置进入用户模式
+                    printf("Enter user operation mode\r\n");
+                    
+//                    printf("User Card：%s and CardID: %s",UserID,CardID);
+                    
+                    strcpy(UserID, CardID);     //将用户卡复制，在后面进行验证
+//                    printf("Copy User Card：%s：\r\n",UserID);
+                    
+                }
+                
+            }
+        }
+        
         // 清理 cJSON 结构体
         cJSON_Delete(root);
     }
@@ -285,6 +304,7 @@ void WiFi_Handle(void)
     memset(ESP8266_struct.ESP_usartbuf, 0x00, sizeof(ESP8266_struct.ESP_usartbuf));
     ESP8266_struct.ESP_cnt = 0;
 }
+
 
 //==============================================================================
 // @函数: void extractJsonData(const char* input, char* output)
