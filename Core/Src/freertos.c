@@ -72,20 +72,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for myTask02 */
-osThreadId_t myTask02Handle;
-const osThreadAttr_t myTask02_attributes = {
-  .name = "myTask02",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow1,
-};
-/* Definitions for myTask03 */
-osThreadId_t myTask03Handle;
-const osThreadAttr_t myTask03_attributes = {
-  .name = "myTask03",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for myTask05 */
 osThreadId_t myTask05Handle;
 const osThreadAttr_t myTask05_attributes = {
@@ -114,6 +100,20 @@ const osThreadAttr_t RFID_Task_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for Value_Task */
+osThreadId_t Value_TaskHandle;
+const osThreadAttr_t Value_Task_attributes = {
+  .name = "Value_Task",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for Flow_Task */
+osThreadId_t Flow_TaskHandle;
+const osThreadAttr_t Flow_Task_attributes = {
+  .name = "Flow_Task",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow3,
+};
 /* Definitions for Mutex_Trace */
 osMutexId_t Mutex_TraceHandle;
 const osMutexAttr_t Mutex_Trace_attributes = {
@@ -136,12 +136,12 @@ const osSemaphoreAttr_t WiFi_BinarySem_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void StartTask02(void *argument);
-void StartTask03(void *argument);
 void StartTask05(void *argument);
 void HMI_StartTask(void *argument);
 void WiFi_StartTask(void *argument);
 void RFID_StartTask(void *argument);
+void Value_StartTask(void *argument);
+void Flow_StartTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -202,14 +202,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of myTask02 */
-  myTask02Handle = osThreadNew(StartTask02, NULL, &myTask02_attributes);
-
-  /* creation of myTask03 */
-  myTask03Handle = osThreadNew(StartTask03, NULL, &myTask03_attributes);
-
   /* creation of myTask05 */
-//  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
+  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
 
   /* creation of HMI_Task */
   HMI_TaskHandle = osThreadNew(HMI_StartTask, NULL, &HMI_Task_attributes);
@@ -219,6 +213,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of RFID_Task */
   RFID_TaskHandle = osThreadNew(RFID_StartTask, NULL, &RFID_Task_attributes);
+
+  /* creation of Value_Task */
+  Value_TaskHandle = osThreadNew(Value_StartTask, NULL, &Value_Task_attributes);
+
+  /* creation of Flow_Task */
+  Flow_TaskHandle = osThreadNew(Flow_StartTask, NULL, &Flow_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -249,53 +249,6 @@ void StartDefaultTask(void *argument)
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
-}
-
-/* USER CODE BEGIN Header_StartTask02 */
-/**
-* @brief Function implementing the myTask02 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask02 */
-void StartTask02(void *argument)
-{
-  /* USER CODE BEGIN StartTask02 */
-//    sprintf(ESP8266_message,"{\"sunlit\":12.3,\"temperature\":22.3,\"personnel\":\"23\",\"created_time\":\"11:12\",\"people\":23,\"day\":12}");
-  /* Infinite loop */
-  for(;;)
-  {
-      sprintf(ESP8266_message,"{\"status\": \"action\",\"dispenser_id\":1,\"temperature\":%0.1f,\
-      \"tds\":%0.1f,\"flow\":false}",DSL.Tem,DSL.Tds);
-      ESP8266_SendData(ESP8266_message);
-//      HAL_UART_Transmit(&ESP_SendUsart, (uint8_t *)ESP8266_message, strlen((const char *)ESP8266_message),0xFFFF);//发送数据
-//      printf(ESP8266_message);
-//      Trace_Task();
-      osDelay(1000);
-  }
-  /* USER CODE END StartTask02 */
-}
-
-/* USER CODE BEGIN Header_StartTask03 */
-/**
-* @brief Function implementing the myTask03 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask03 */
-void StartTask03(void *argument)
-{
-  /* USER CODE BEGIN StartTask03 */
-
-  /* Infinite loop */
-  for(;;)
-  {
-      DSL.Tem = Ds18b20_Get_Temp();
-      TDS_GetValue();
-//      printf("温度：%f°C",DSL.Tem);
-      osDelay(1000);
-  }
-  /* USER CODE END StartTask03 */
 }
 
 /* USER CODE BEGIN Header_StartTask05 */
@@ -380,6 +333,53 @@ void RFID_StartTask(void *argument)
   /* USER CODE END RFID_StartTask */
 }
 
+/* USER CODE BEGIN Header_Value_StartTask */
+/**
+* @brief Function implementing the Value_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Value_StartTask */
+void Value_StartTask(void *argument)
+{
+  /* USER CODE BEGIN Value_StartTask */
+  /* Infinite loop */
+  for(;;)
+  {
+      DSL.Tem = Ds18b20_Get_Temp();
+      TDS_GetValue();
+//    printf("温度：%f°C",DSL.Tem);
+      
+      sprintf(ESP8266_message,"{\"status\": \"action\",\"dispenser_id\":%d,\"temperature\":%0.1f,\
+      \"tds\":%0.1f,\"flow\":%s}",DSL.ID,DSL.Tem,DSL.Tds,DSL.Flow? "true" : "false");
+      ESP8266_SendData(ESP8266_message);
+      
+      Usart3Printf("t1.txt=\"%0.2f\"\xff\xff\xfft2.txt=\"%0.2f\"\xff\xff\xff",DSL.Tem,DSL.Tds);
+      
+      osDelay(1000);
+  }
+  /* USER CODE END Value_StartTask */
+}
+
+/* USER CODE BEGIN Header_Flow_StartTask */
+/**
+* @brief Function implementing the Flow_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Flow_StartTask */
+void Flow_StartTask(void *argument)
+{
+  /* USER CODE BEGIN Flow_StartTask */
+  /* Infinite loop */
+  for(;;)
+  {
+      
+     osDelay(1);
+  }
+  /* USER CODE END Flow_StartTask */
+}
+
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
@@ -403,7 +403,7 @@ void Trace_Task(void)
         osMutexRelease(Mutex_TraceHandle);
     }
     // 打印所有任务的信息
-    printf("任务名称\t\t状态   优先级   剩余栈   编号\n%s\n", taskInfoBuffer);
+    printf("任务名称\t\t状态    优先级    剩余栈    编号\n%s\n", taskInfoBuffer);
 }
 /* USER CODE END Application */
 

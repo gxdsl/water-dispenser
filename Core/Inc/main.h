@@ -59,12 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define DQ_Pin GPIO_PIN_2
 #define DQ_GPIO_Port GPIOE
-#define Card_Delete_Pin GPIO_PIN_3
-#define Card_Delete_GPIO_Port GPIOE
-#define Card_Record_Pin GPIO_PIN_4
-#define Card_Record_GPIO_Port GPIOE
-#define Relay_Pin GPIO_PIN_0
-#define Relay_GPIO_Port GPIOA
+#define relay_Pin GPIO_PIN_3
+#define relay_GPIO_Port GPIOE
 #define YFS401_Pin GPIO_PIN_5
 #define YFS401_GPIO_Port GPIOA
 #define RC522_SDA_Pin GPIO_PIN_8

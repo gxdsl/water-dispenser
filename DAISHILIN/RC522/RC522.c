@@ -431,16 +431,16 @@ char PCD_Anticoll(uint8_t *pSnr)
             status = PCD_ERR;
         }
     }
-	switch(status)
-	{
-		case PCD_OK:
-            printf("寻卡OK\r\n");break;
-		case PCD_ERR:
-            printf("寻卡ERROR\r\n");break;
-		case PCD_NOTAGERR:
-            printf("无卡\r\n");break;
-//            break;
-	}
+    
+//	switch(status)
+//	{
+//		case PCD_OK:
+//            printf("寻卡OK\r\n");break;
+//		case PCD_ERR:
+//            printf("寻卡ERROR\r\n");break;
+//		case PCD_NOTAGERR:
+//            printf("无卡\r\n");break;
+//	}
 
     MFRC_SetBitMask(MFRC_CollReg, 0x80);
     return status;
@@ -844,59 +844,59 @@ char ReadAmount( uint8_t ucAddr, uint32_t *pData )
     return status;
 }
 
-/***************************************************************************************
-* 函数名称：RC522_Test
-* 功能描述：RC522读写卡
-* 入口参数：无
-* 出口参数：无
-* 返 回 值：无
-* 说    明：无
-***************************************************************************************/
-void RC522_Amount(void)
-{
-    uint32_t writeAmount = 100; //初始化金额为100
-    
-    uint32_t readValue;         //存放读取的金额
-//    char Card_ID[8];
-    char cStr[30];
-    
-    if(PCD_Request(PICC_REQALL,ucArray_ID) == PCD_OK)
-	{
-        /*防冲撞（当有多张卡进入读写器操作范围时，防冲突机制会从其中选择一张进行操作）*/
-		if(PCD_Anticoll(ucArray_ID ) == PCD_OK )
-		{
-			PCD_Select(ucArray_ID);
-            
-//            printf("%s",ucArray_ID);
+/////***************************************************************************************
+////* 函数名称：RC522_Test
+////* 功能描述：RC522读写卡
+////* 入口参数：无
+////* 出口参数：无
+////* 返 回 值：无
+////* 说    明：无
+////***************************************************************************************/
+////void RC522_Amount(void)
+////{
+////    uint32_t writeAmount = 100; //初始化金额为100
+////    
+////    uint32_t readValue;         //存放读取的金额
+//////    char Card_ID[8];
+////    char cStr[30];
+////    
+////    if(PCD_Request(PICC_REQALL,ucArray_ID) == PCD_OK)
+////	{
+////        /*防冲撞（当有多张卡进入读写器操作范围时，防冲突机制会从其中选择一张进行操作）*/
+////		if(PCD_Anticoll(ucArray_ID ) == PCD_OK )
+////		{
+////			PCD_Select(ucArray_ID);
+////            
+//////            printf("%s",ucArray_ID);
 
-			PCD_AuthState( PICC_AUTHENT1A, 0x01, KeyValue, ucArray_ID );//校验密码 
-            WriteAmount(0x01,writeAmount); //写入金额
-            if(ReadAmount(0x01,&readValue) == PCD_OK)	//读取金额
-			{
-				//writeValue +=100;
-                sprintf(cStr,"The Card ID is: %02X%02X%02X%02X",ucArray_ID[0],ucArray_ID[1],ucArray_ID[2],ucArray_ID[3]);
-				printf("%s\r\n",cStr);  //打印卡片ID
-				
-				printf ("余额为：%d\r\n",readValue);
-				sprintf (cStr,"TThe residual amount: %d", readValue);
+////			PCD_AuthState( PICC_AUTHENT1A, 0x01, KeyValue, ucArray_ID );//校验密码 
+////            WriteAmount(0x01,writeAmount); //写入金额
+////            if(ReadAmount(0x01,&readValue) == PCD_OK)	//读取金额
+////			{
+////				//writeValue +=100;
+////                sprintf(cStr,"The Card ID is: %02X%02X%02X%02X",ucArray_ID[0],ucArray_ID[1],ucArray_ID[2],ucArray_ID[3]);
+////				printf("%s\r\n",cStr);  //打印卡片ID
+////				
+////				printf ("余额为：%d\r\n",readValue);
+////				sprintf (cStr,"TThe residual amount: %d", readValue);
 
-                PCD_Halt();
-			}
-            /* 按键1检测 */
-            if( Card_D == 0 && Card_R == 1)
-            {
-                printf("金额 +100\r\n");
-                writeAmount += 100;
-            }
-            /* 按键2检测 */
-            if( Card_D == 1 && Card_R == 0)
-            {
-                printf("金额 -100\r\n");
-                writeAmount -= 100;
-            }
-		}
-	}
-}
+////                PCD_Halt();
+////			}
+////            /* 按键1检测 */
+////            if( Card_D == 0 && Card_R == 1)
+////            {
+////                printf("金额 +100\r\n");
+////                writeAmount += 100;
+////            }
+////            /* 按键2检测 */
+////            if( Card_D == 1 && Card_R == 0)
+////            {
+////                printf("金额 -100\r\n");
+////                writeAmount -= 100;
+////            }
+////		}
+////	}
+////}
 
 //==============================================================================
 // @函数: void RC522_Read(void)
@@ -917,7 +917,7 @@ void RC522_Read(void)
 			PCD_Select(ucArray_ID);
             
             sprintf(CardID,"%02X%02X%02X%02X",ucArray_ID[0],ucArray_ID[1],ucArray_ID[2],ucArray_ID[3]);
-			printf("The card value read is %s\r\n",CardID);  //打印读到卡片ID
+			printf("Card is %s\r\n",CardID);  //打印读到卡片ID
             
             PCD_Halt(); //进入休眠状态
         }
@@ -937,6 +937,8 @@ void RC522_Read(void)
           memset(UserID, 0x00, sizeof(UserID));     //清除用户卡
           DSL.Mode = 0;     //退出用户操作模式
           printf("Exit user operation mode\r\n");
+          
+          Usart3Printf("page 1\xff\xff\xff");       //退出串口屏用户操作模式
       }
 //      else
 //      {

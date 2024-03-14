@@ -206,12 +206,23 @@ void HMI_Handle(void)
     // 检查 Rx3Buff 中的内容是否为 "close"
     else if (strcmp((const char*)Rx3Buff, "close") == 0)
     {
-        printf("关\n");
+        if(DSL.Mode == 1)
+        {
+//            printf("关\n");
+            DSL.Flow = false;
+            HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
+        }
     }
     // 检查 Rx3Buff 中的内容是否为 "open"
     else if (strcmp((const char*)Rx3Buff, "open") == 0)
     {
-        printf("开\n");
+        if(DSL.Mode == 1)
+        {
+//            printf("开\n");
+            DSL.Flow = true;
+            HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_RESET);      //继电器开
+        }
+        
     }
     // 如果 Rx3Buff 不是以上任何一种情况，打印 "未知数据"
     else
@@ -235,7 +246,7 @@ void WiFi_Handle(void)
 {
     // 打印接收到的数据
 //    printf("Received data: %s\r\n", ESP8266_struct.ESP_usartbuf);
-    
+
     // 在需要处理 ESP8266 数据的地方调用提取函数
     extractJsonData((const char*)ESP8266_struct.ESP_usartbuf, jsonBuffer);
     
@@ -273,9 +284,9 @@ void WiFi_Handle(void)
                 // 解析 "balance" 和 "user" 字段的值
                 int balanceValue = balanceJson->valueint;
                 const char* userValue = userJson->valuestring;
-                
+
                 // 打印 "balance" 和 "user" 字段的值
-                printf("Balance: %d, User: %s\r\n", balanceValue, userValue);
+//                printf("Balance: %d, User: %s\r\n", balanceValue, userValue);
                 
                 if(strcmp((const char*)userValue, "None") == 0)
                 {
@@ -289,10 +300,13 @@ void WiFi_Handle(void)
 //                    printf("User Card：%s and CardID: %s",UserID,CardID);
                     
                     strcpy(UserID, CardID);     //将用户卡复制，在后面进行验证
-//                    printf("Copy User Card：%s：\r\n",UserID);
                     
+                    Usart3Printf("page 2\xff\xff\xfft3.txt=\"%s\"\xff\xff\xfft4.txt=\"%d\"\xff\xff\xff",userValue,balanceValue);     //进入串口屏用户操作页面
+                    
+//                    printf("Copy User Card：%s：\r\n",UserID);
+
                 }
-                
+
             }
         }
         

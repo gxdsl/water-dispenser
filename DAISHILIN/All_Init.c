@@ -15,7 +15,8 @@
 // 声明并初始化结构体实例 DSL
 DATA_DSL DSL =
 {
-    .Mode = 0,   //未进入用户操作模式
+    .Mode = 0,   // 未进入用户操作模式
+    .Flow = false,   // 饮水机未出水
     .ID = 1,     // 设备ID为1
     .Start = 0,  // 系统初始化进度为0
     .Tem = 0.0f, // 水温为0.0
@@ -37,6 +38,8 @@ void LoRa_Init(void);
 //==============================================================================
 void ALL_Init(void)
 {
+    HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
+    
     HAL_UART_Receive_IT(&huart1, (uint8_t *)&Rx1Data, 1);//调用一次串口中断函数
     HAL_UART_Receive_IT(&huart2, (uint8_t *)&Rx2Data, 1);//调用一次串口中断函数
     HAL_UART_Receive_IT(&huart3, (uint8_t *)&Rx3Data, 1);//调用一次串口中断函数
@@ -45,6 +48,9 @@ void ALL_Init(void)
 //  
 //    __HAL_TIM_CLEAR_FLAG(&htim7, TIM_SR_UIF);       //防止TIM7启动时进一次中断
 //    HAL_TIM_Base_Start_IT(&htim7);                  //启动定时器7,每秒一次中断
+    
+    Usart3Printf("page 0\xFF\xFF\xFF");     //回到页面0
+    HAL_Delay(500);
     
     TDS_Init();
     

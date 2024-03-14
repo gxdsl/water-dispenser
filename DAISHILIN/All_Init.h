@@ -7,6 +7,7 @@
 //饮水机数据DATA结构体
 typedef struct{
     bool Mode;      //是否进入用户操作模式
+    bool Flow;      //是否出水
     uint8_t ID;     //设备ID
     uint16_t Start; //系统初始化进度
 	float Tem;      //水温
