@@ -37,25 +37,37 @@ void ESP8266_Init(void)
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CWMODE响应成功\r\n"); 
 	printf("AT+CWMODE响应成功\r\n");
+    DSL.Start += 5;
+    Usart3Printf("t0.txt=\"AT+CWMODE响应成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
+    HAL_Delay(500);
     
 	while(ESP8266_SendCMD("AT+CWDHCP=1,1\r\n", "OK"))
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CWDHCP响应成功\r\n");
 	printf("AT+CWDHCP响应成功\r\n");
+    DSL.Start += 5;
+    Usart3Printf("t0.txt=\"AT+CWDHCP响应成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
+    HAL_Delay(500);
     
 	while(ESP8266_SendCMD(WIFI_Password, "GOT IP"))
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CWJAP响应成功\r\n");
     printf("AT+CWJAP响应成功\r\n");
+    DSL.Start += 5;
+    Usart3Printf("t0.txt=\"AT+CWJAP响应成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
+    HAL_Delay(500);
 	
 	while(ESP8266_SendCMD(WIFI_IPAdder_IPPort, "CONNECT"))
 		HAL_Delay(500);
 //	UsartPrintf(&ESP_DebugUsart,"AT+CIPSTART响应成功\r\n");
     printf("AT+CIPSTART响应成功\r\n");
+    DSL.Start += 5;
+    Usart3Printf("t0.txt=\"AT+CIPSTART响应成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
+    HAL_Delay(500);
     
     printf("ESP8266初始化成功\r\n");
     
-    DSL.Start +=20;
+    DSL.Start +=10;
     Usart3Printf("t0.txt=\"ESP8266初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF",DSL.Start);
     
 	HAL_Delay(500);

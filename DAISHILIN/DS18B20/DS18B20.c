@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "Usart_dsl.h"
 #include "All_Init.h"
+#include "stdio.h"
 
 void DQ_Write(unsigned char LEVEL_Type)
 {
@@ -235,7 +236,7 @@ void Ds18B20_Write_Byte(uint8_t data)
 /** 
  * @brief  DS18B20 初始化
  * @param  无
- * @return 存在脉冲
+ * @return 无
  * @note   初始化包含: 复位、检测存在脉冲
  */
 void Ds18b20_Init()
@@ -248,7 +249,7 @@ void Ds18b20_Init()
     if(Ds18b20_status == 0) 
     {
         printf("DS10B20初始化成功\r\n");
-        HAL_Delay(100);
+//        HAL_Delay(100);
 
 //        Usart3Printf("t0.txt=\"DS10B20初始化成功\"\xFF\xFF\xFF");
         HAL_Delay(500);

@@ -44,10 +44,6 @@ void ALL_Init(void)
     HAL_UART_Receive_IT(&huart2, (uint8_t *)&Rx2Data, 1);//调用一次串口中断函数
     HAL_UART_Receive_IT(&huart3, (uint8_t *)&Rx3Data, 1);//调用一次串口中断函数
     
-//    HAL_TIM_Base_Start(&htim2);
-//  
-//    __HAL_TIM_CLEAR_FLAG(&htim7, TIM_SR_UIF);       //防止TIM7启动时进一次中断
-//    HAL_TIM_Base_Start_IT(&htim7);                  //启动定时器7,每秒一次中断
     
     Usart3Printf("page 0\xFF\xFF\xFF");     //回到页面0
     HAL_Delay(500);
@@ -55,6 +51,11 @@ void ALL_Init(void)
     TDS_Init();
     
     Ds18b20_Init();
+    
+    DSL.Start += 10;
+    Usart3Printf("t0.txt=\"DS10B20初始化成功\"\xFF\xFF\xFF");
+    Usart3Printf("j0.val=%d\xFF\xFF\xFF", DSL.Start);
+    HAL_Delay(500);
     
     ESP8266_Init();
     

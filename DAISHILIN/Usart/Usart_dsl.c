@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <RC522.h>
+#include <YFS401.h>
 
 extern osSemaphoreId_t HMI_BinarySemHandle;     //串口屏二值信号量
 extern osSemaphoreId_t WiFi_BinarySemHandle;    //WiFi二值信号量
 
-//uint8_t UartTxBuf[255];      //定义串口数据发送缓存数组
 
 //串口1ESP8266，串口2LoRa，串口3串口屏
 
@@ -117,24 +117,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
-////==============================================================================
-//// @函数: void UsartPrintf(UART_HandleTypeDef *huart,const char *format,...)
-//// @描述: 串口的Printf重定义 
-//// @参数: None
-//// @返回: None
-//// @时间: 2023.10.25
-////==============================================================================
-//void UsartPrintf(UART_HandleTypeDef *huart,const char *format,...) 
-//{
-//    uint16_t len;
-//    va_list args;
-//    va_start(args,format);
-//    len = vsnprintf((char*)UartTxBuf,sizeof(UartTxBuf)+1,(char*)format,args);
-//    va_end(args);
-
-//    HAL_UART_Transmit(huart, UartTxBuf,len,0x0FFF);
-////    HAL_UART_Transmit_DMA(&USARTx, UartTxBuf, len);
-//}
 
 //==============================================================================
 // @函数: void Usart1Printf(const char *format,...)
@@ -206,28 +188,35 @@ void HMI_Handle(void)
     // 检查 Rx3Buff 中的内容是否为 "close"
     else if (strcmp((const char*)Rx3Buff, "close") == 0)
     {
-        if(DSL.Mode == 1)
+        if(DSL.Mode == 1 && DSL.Flow == true)   //处于用户操作模式，电机开启状态
         {
-//            printf("关\n");
             DSL.Flow = false;
+            YFS401_Stop();      //关闭YFS401水流器
+            HAL_Delay(100);     //延时避免卡死
             HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
+            HAL_Delay(100);     //延时避免卡死
+            
+//            printf("UserID is %s",UserID);
+            char amount_message[50];
+            sprintf(amount_message,"{\"dispenser_id\":%d,\"card\":\"%s\",\"amount\":%.1lf}",DSL.ID,UserID,golbal_flow.acculat);     //结算余额
+            ESP8266_SendData(amount_message);
         }
     }
     // 检查 Rx3Buff 中的内容是否为 "open"
     else if (strcmp((const char*)Rx3Buff, "open") == 0)
     {
-        if(DSL.Mode == 1)
+        if(DSL.Mode == 1 && DSL.Flow == false)  //处于用户操作模式，电机关闭状态
         {
 //            printf("开\n");
             DSL.Flow = true;
+            YFS401_Start();     //启动YFS401水流器
             HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_RESET);      //继电器开
         }
-        
     }
     // 如果 Rx3Buff 不是以上任何一种情况，打印 "未知数据"
     else
     {
-    //        printf("未知数据\n");
+            printf("串口屏未知数据\n");
     }
     
     // 处理完数据后清空数组
@@ -294,16 +283,14 @@ void WiFi_Handle(void)
                 }
                 else
                 {
-                    DSL.Mode = 1;   //设置进入用户模式
-                    printf("Enter user operation mode\r\n");
-                    
-//                    printf("User Card：%s and CardID: %s",UserID,CardID);
-                    
-                    strcpy(UserID, CardID);     //将用户卡复制，在后面进行验证
+                    if(DSL.Mode == 0)
+                    {
+                        DSL.Mode = 1;   //设置进入用户模式
+                        printf("Enter user operation mode\r\n");
+                        strcpy(UserID, CardID);     //将用户卡复制，在后面进行验证
+                    }
                     
                     Usart3Printf("page 2\xff\xff\xfft3.txt=\"%s\"\xff\xff\xfft4.txt=\"%d\"\xff\xff\xff",userValue,balanceValue);     //进入串口屏用户操作页面
-                    
-//                    printf("Copy User Card：%s：\r\n",UserID);
 
                 }
 

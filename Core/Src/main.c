@@ -54,6 +54,8 @@
 
 /* USER CODE BEGIN PV */
 
+extern osSemaphoreId_t Flow_BinarySemHandle;     //流量器二值信号量
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -196,15 +198,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-    if (htim == (&htim7))
+    if (htim->Instance == TIM7)
     {
         golbal_flow.pluse_1s = __HAL_TIM_GET_COUNTER(&htim2);   //得到TIM2的脉冲计数
         __HAL_TIM_SET_COUNTER(&htim2,0);                        //TIM2计数清零
         
-        golbal_flow.receive_flag = 1;
+//        golbal_flow.receive_flag = 1;
         
-        // 任务恢复
-        osThreadResume(myTask05Handle);
+        // 信号量释放
+        osSemaphoreRelease(Flow_BinarySemHandle);
     }
   /* USER CODE END Callback 1 */
 }

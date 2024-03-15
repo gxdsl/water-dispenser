@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "stdint.h"
+#include "All_Init.h"
 
 //DQ_GPIO
 #define DQ_GPIO_Port  GPIOE

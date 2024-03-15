@@ -352,7 +352,7 @@ void PCD_Init(void)
     
     printf("RC522初始化成功\n");
     
-    DSL.Start +=20;
+    DSL.Start +=10;
     Usart3Printf("t0.txt=\"RFID初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
     HAL_Delay(500);
 }
@@ -917,7 +917,7 @@ void RC522_Read(void)
 			PCD_Select(ucArray_ID);
             
             sprintf(CardID,"%02X%02X%02X%02X",ucArray_ID[0],ucArray_ID[1],ucArray_ID[2],ucArray_ID[3]);
-			printf("Card is %s\r\n",CardID);  //打印读到卡片ID
+//			printf("Card is %s\r\n",CardID);  //打印读到卡片ID
             
             PCD_Halt(); //进入休眠状态
         }
@@ -927,17 +927,22 @@ void RC522_Read(void)
     {
       char card_message[50];
       sprintf(card_message,"{\"dispenser_id\":%d,\"card\":\"%s\"}",DSL.ID,CardID);
-      ESP8266_SendData(card_message);
+//      printf("card_message = %s",card_message);
+      ESP8266_SendData(card_message);       //发送card ID，查询用户名和余额
     }
     else
     {
       if(DSL.Mode == 1 && (strcmp((const char*)UserID,(const char*)CardID) != 0)) //如果在用户操作模式，卡值不同
       {
+//          printf("UserID = %s\r\nCardID = %s\r\n",UserID,CardID);
           
           memset(UserID, 0x00, sizeof(UserID));     //清除用户卡
           DSL.Mode = 0;     //退出用户操作模式
           printf("Exit user operation mode\r\n");
           
+          
+          HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
+          DSL.Flow = false;
           Usart3Printf("page 1\xff\xff\xff");       //退出串口屏用户操作模式
       }
 //      else

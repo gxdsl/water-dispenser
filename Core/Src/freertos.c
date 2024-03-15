@@ -72,13 +72,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for myTask05 */
-osThreadId_t myTask05Handle;
-const osThreadAttr_t myTask05_attributes = {
-  .name = "myTask05",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for HMI_Task */
 osThreadId_t HMI_TaskHandle;
 const osThreadAttr_t HMI_Task_attributes = {
@@ -129,6 +122,11 @@ osSemaphoreId_t WiFi_BinarySemHandle;
 const osSemaphoreAttr_t WiFi_BinarySem_attributes = {
   .name = "WiFi_BinarySem"
 };
+/* Definitions for Flow_BinarySem */
+osSemaphoreId_t Flow_BinarySemHandle;
+const osSemaphoreAttr_t Flow_BinarySem_attributes = {
+  .name = "Flow_BinarySem"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -136,7 +134,6 @@ const osSemaphoreAttr_t WiFi_BinarySem_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void StartTask05(void *argument);
 void HMI_StartTask(void *argument);
 void WiFi_StartTask(void *argument);
 void RFID_StartTask(void *argument);
@@ -186,6 +183,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of WiFi_BinarySem */
   WiFi_BinarySemHandle = osSemaphoreNew(1, 1, &WiFi_BinarySem_attributes);
 
+  /* creation of Flow_BinarySem */
+  Flow_BinarySemHandle = osSemaphoreNew(1, 1, &Flow_BinarySem_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -201,9 +201,6 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-
-  /* creation of myTask05 */
-  myTask05Handle = osThreadNew(StartTask05, NULL, &myTask05_attributes);
 
   /* creation of HMI_Task */
   HMI_TaskHandle = osThreadNew(HMI_StartTask, NULL, &HMI_Task_attributes);
@@ -249,25 +246,6 @@ void StartDefaultTask(void *argument)
     osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
-}
-
-/* USER CODE BEGIN Header_StartTask05 */
-/**
-* @brief Function implementing the myTask05 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartTask05 */
-void StartTask05(void *argument)
-{
-  /* USER CODE BEGIN StartTask05 */
-  /* Infinite loop */
-  for(;;)
-  {
-    Flow_Read();
-    osDelay(1000);
-  }
-  /* USER CODE END StartTask05 */
 }
 
 /* USER CODE BEGIN Header_HMI_StartTask */
@@ -357,6 +335,7 @@ void Value_StartTask(void *argument)
       Usart3Printf("t1.txt=\"%0.2f\"\xff\xff\xfft2.txt=\"%0.2f\"\xff\xff\xff",DSL.Tem,DSL.Tds);
       
       osDelay(1000);
+      HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_DMABuffer,(NUM_CHANNELS*NUM_SAMPLES_PER_CHANNEL)*2);  //启动ADC转换和DMA数据传输
   }
   /* USER CODE END Value_StartTask */
 }
@@ -374,8 +353,9 @@ void Flow_StartTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+     osSemaphoreAcquire(Flow_BinarySemHandle, osWaitForever);
       
-     osDelay(1);
+      Flow_Read();
   }
   /* USER CODE END Flow_StartTask */
 }

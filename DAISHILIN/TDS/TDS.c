@@ -65,8 +65,9 @@ void TDS_GetValue(void)
         
         DSL.Tds=133.42f*compensationVolatge*compensationVolatge*compensationVolatge-255.86f*compensationVolatge*compensationVolatge+857.39f*compensationVolatge*0.5f;
 //        printf("Voltage = %0.3fmV\r\n",ADC_DMABuffer_AV[0]*3300.0/4096);
-        osDelay(1000);
-        HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_DMABuffer,(NUM_CHANNELS*NUM_SAMPLES_PER_CHANNEL)*2);  //启动ADC转换和DMA数据传输
+        
+//        osDelay(1000);
+//        HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_DMABuffer,(NUM_CHANNELS*NUM_SAMPLES_PER_CHANNEL)*2);  //启动ADC转换和DMA数据传输
     }
 }
 
