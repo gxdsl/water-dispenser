@@ -77,57 +77,57 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
     if(huart->Instance == huart2.Instance)
     {
-//        if(Uart2_RxCnt >= 255)  //溢出判断
-//        {
-//            Uart2_RxCnt = 0;
-//            memset(Rx2Buff,0x00,sizeof(Rx2Buff));
-//            HAL_UART_Transmit(&huart2, (uint8_t *)"数据溢出", 10,0xFFFF);
-//        }
-//        else
-//        {
-//            Rx2Buff[Uart2_RxCnt++] = Rx2Data;   //接收数据转存
-//            if((Rx2Buff[Uart2_RxCnt-1] == 0x0A)&&(Rx2Buff[Uart2_RxCnt-2] == 0x0D)) //判断结束位/r/n
-//            {
-//                Rx2Buff[Uart2_RxCnt-2] = 0x00;  //去除结束位/r/n
-//                
-//                Uart2_RxCnt = 0;
-//                osSemaphoreRelease(WiFi_BinarySemHandle);   //信号量的计数值增加1
-//            }
-//        }
-        
-        if (Uart2_RxCnt >= sizeof(Rx2Buff) - 1)  // 溢出判断
+        if(Uart2_RxCnt >= 255)  //溢出判断
         {
             Uart2_RxCnt = 0;
-            HAL_UART_Transmit(&huart2, (uint8_t *)"数据溢出", 10, 0xFFFF);
+            memset(Rx2Buff,0x00,sizeof(Rx2Buff));
+            HAL_UART_Transmit(&huart2, (uint8_t *)"数据溢出", 10,0xFFFF);
         }
         else
         {
-            if (Rx2Data == 0xff)  // 判断是否为包头的第一个字节
+            Rx2Buff[Uart2_RxCnt++] = Rx2Data;   //接收数据转存
+            if((Rx2Buff[Uart2_RxCnt-1] == 0x0A)&&(Rx2Buff[Uart2_RxCnt-2] == 0x0D)) //判断结束位/r/n
             {
-                if (HMI_Flag == 0 && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 如果前一个字节也是包头的一部分
-                {
-                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-                }
-                else if (HMI_Flag == 0)  // 第一个包头字节，开始接收数据
-                {
-                    Uart2_RxCnt = 0;
-                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-                    HMI_Flag = 1;
-                }
-            }
-            else if (Rx2Data == 0xff && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 包头的第二个字节
-            {
-                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-            }
-            else if (Rx2Data == 0x0a && Rx2Buff[Uart2_RxCnt - 1] == 0x0d && HMI_Flag == 1)  // 检测到包尾
-            {
-                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-                Rx2Buff[Uart2_RxCnt] = '\0';  // 在包尾后加上字符串结束符
-                HMI_Flag = 0;  // 标记数据包结束
+                Rx2Buff[Uart2_RxCnt-2] = 0x00;  //去除结束位/r/n
                 
-                osSemaphoreRelease(WiFi_BinarySemHandle);  // 信号量的计数值增加1
+                Uart2_RxCnt = 0;
+                osSemaphoreRelease(WiFi_BinarySemHandle);   //信号量的计数值增加1
             }
         }
+        
+//        if (Uart2_RxCnt >= sizeof(Rx2Buff) - 1)  // 溢出判断
+//        {
+//            Uart2_RxCnt = 0;
+//            HAL_UART_Transmit(&huart2, (uint8_t *)"数据溢出", 10, 0xFFFF);
+//        }
+//        else
+//        {
+//            if (Rx2Data == 0xff)  // 判断是否为包头的第一个字节
+//            {
+//                if (HMI_Flag == 0 && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 如果前一个字节也是包头的一部分
+//                {
+//                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
+//                }
+//                else if (HMI_Flag == 0)  // 第一个包头字节，开始接收数据
+//                {
+//                    Uart2_RxCnt = 0;
+//                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
+//                    HMI_Flag = 1;
+//                }
+//            }
+//            else if (Rx2Data == 0xff && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 包头的第二个字节
+//            {
+//                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
+//            }
+//            else if (Rx2Data == 0x0a && Rx2Buff[Uart2_RxCnt - 1] == 0x0d && HMI_Flag == 1)  // 检测到包尾
+//            {
+//                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
+//                Rx2Buff[Uart2_RxCnt] = '\0';  // 在包尾后加上字符串结束符
+//                HMI_Flag = 0;  // 标记数据包结束
+
+//                osSemaphoreRelease(WiFi_BinarySemHandle);  // 信号量的计数值增加1
+//            }
+//        }
         
         HAL_UART_Receive_IT(&huart2, (uint8_t *)&Rx2Data, 1);   //再开启接收中断
     }
@@ -217,6 +217,7 @@ void HMI_Handle(void)
 {
     printf("HMIBuff = \"%s\"\r\n",Rx3Buff); // 使用双引号包裹字符串，方便观察是否有额外的字符
     
+    
     // 检查 Rx3Buff 中的内容是否为空
     if (strcmp((const char*)Rx3Buff, "") == 0)
     {
@@ -253,7 +254,7 @@ void HMI_Handle(void)
     // 如果 Rx3Buff 不是以上任何一种情况，打印 "未知数据"
     else
     {
-            printf("串口屏未知数据\n");
+        printf("串口屏未知数据\n");
     }
     
     // 处理完数据后清空数组

@@ -940,7 +940,6 @@ void RC522_Read(void)
           DSL.Mode = 0;     //退出用户操作模式
           printf("Exit user operation mode\r\n");
           
-          
           HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
           DSL.Flow = false;
           Usart3Printf("page 1\xff\xff\xff");       //退出串口屏用户操作模式

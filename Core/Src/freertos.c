@@ -262,7 +262,7 @@ void HMI_StartTask(void *argument)
   for(;;)
   {
 //      printf("HMI_StartTask");
-      // 当串口3接收到数据时，任务被唤醒
+      // 当串口3(串口屏)接收到数据时，任务被唤醒
       osSemaphoreAcquire(HMI_BinarySemHandle, osWaitForever);
       
       HMI_Handle();
@@ -284,7 +284,7 @@ void WiFi_StartTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-      // 当WiFi接收到数据时，任务被唤醒
+      // 当串口1(ESP8266)接收到数据时，任务被唤醒
       osSemaphoreAcquire(WiFi_BinarySemHandle, osWaitForever);
       
       WiFi_Handle();
@@ -353,7 +353,8 @@ void Flow_StartTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-     osSemaphoreAcquire(Flow_BinarySemHandle, osWaitForever);
+      // 当TIM7每1秒时，任务被唤醒
+      osSemaphoreAcquire(Flow_BinarySemHandle, osWaitForever);
       
       Flow_Read();
   }
