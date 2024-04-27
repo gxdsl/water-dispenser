@@ -67,7 +67,7 @@ void ALL_Init(void)
 
 void LoRa_Init(void)
 {
-    printf("LoRa初始化成功\r\n");
+    printf("%sLoRa初始化成功\r\n","@");
     
     DSL.Start = 100;
     Usart3Printf("t0.txt=\"LoRa初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);

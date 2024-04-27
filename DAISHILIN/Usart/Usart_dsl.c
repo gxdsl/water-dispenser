@@ -206,6 +206,35 @@ void Usart3Printf(const char *format,...)
     HAL_UART_Transmit(&huart3, Uart3TxBuf, len,0xffff);
 }
 
+
+//==============================================================================
+// @函数: void LoRaPrintf(const char *format, ...)
+// @描述: LoRa串口发送函数（包头为@，包尾为\r\n）
+// @参数: None
+// @返回: None
+// @时间: 2024.3.22
+//==============================================================================
+void LoRaPrintf(const char *format, ...) 
+{
+    char buffer[256]; // 假设最大长度为256个字符
+    va_list args;
+    va_start(args, format);
+    
+    // 在参数前加上@字符
+    buffer[0] = '@';
+    vsnprintf(&buffer[1], sizeof(buffer) - 3, format, args); // -3是为了留出@字符和\r\n的位置
+    va_end(args);
+    
+    // 在尾部加上\r\n
+    int len = strlen(buffer);
+    buffer[len] = '\r';
+    buffer[len + 1] = '\n';
+    buffer[len + 2] = '\0';
+
+    HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), 0xFFFF);
+}
+
+
 //==============================================================================
 // @函数: void HMI_Handle(void)
 // @描述: 处理HMI发送的数据

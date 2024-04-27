@@ -11,6 +11,7 @@ extern uint8_t Rx3Data;
 void Usart1Printf(const char *format,...);
 void Usart2Printf(const char *format,...);
 void Usart3Printf(const char *format,...);
+void LoRaPrintf(const char *format,...);
 
 void HMI_Handle(void);
 void WiFi_Handle(void);
