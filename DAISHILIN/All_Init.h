@@ -18,5 +18,6 @@ typedef struct{
 extern DATA_DSL DSL;   //声明结构体数据
 
 void ALL_Init(void);
+void Init_Progress(unsigned int Progress);
 
 #endif

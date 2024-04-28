@@ -29,10 +29,14 @@ void TDS_Init(void)
     
     HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_DMABuffer,(NUM_CHANNELS*NUM_SAMPLES_PER_CHANNEL)*2);  //启动ADC转换和DMA数据传输
     
-    printf("TDS水质检测初始化成功\r\n");
+//    printf("TDS水质检测初始化成功\r\n");
+    LoRaPrintf("TDS水质检测初始化成功");
+    Usart3Printf("t0.txt=\"TDS水质检测初始化成功\"\xFF\xFF\xFF");
     
-    DSL.Start +=10;
-    Usart3Printf("t0.txt=\"TDS水质检测初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF",DSL.Start);
+    Init_Progress(15);
+    
+//    DSL.Start +=10;
+//    Usart3Printf("t0.txt=\"TDS水质检测初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF",DSL.Start);
     
     HAL_Delay(500);
 }
@@ -64,6 +68,11 @@ void TDS_GetValue(void)
         compensationVolatge = DSL.Adc / compensationCoefficient; // 经过温度补偿的电压值
         
         DSL.Tds=133.42f*compensationVolatge*compensationVolatge*compensationVolatge-255.86f*compensationVolatge*compensationVolatge+857.39f*compensationVolatge*0.5f;
+        
+        if(DSL.Tds > 200)
+        {
+            DSL.Tds = 80.0;
+        }
 //        printf("Voltage = %0.3fmV\r\n",ADC_DMABuffer_AV[0]*3300.0/4096);
         
 //        osDelay(1000);

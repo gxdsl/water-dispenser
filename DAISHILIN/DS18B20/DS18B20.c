@@ -4,6 +4,7 @@
 #include "All_Init.h"
 #include "stdio.h"
 
+
 void DQ_Write(unsigned char LEVEL_Type)
 {
    if(LEVEL_Type) 
@@ -245,22 +246,23 @@ void Ds18b20_Init()
     Ds18b20_Reset();
 	
 	Ds18b20_status = Ds18B20_CheckPulse();
-    HAL_Delay(500);
+    HAL_Delay(100);
     if(Ds18b20_status == 0) 
     {
-        printf("DS10B20初始化成功\r\n");
-//        HAL_Delay(100);
+        LoRaPrintf("DS18B20 is initialized successfully");
 
-//        Usart3Printf("t0.txt=\"DS10B20初始化成功\"\xFF\xFF\xFF");
-        HAL_Delay(500);
+        Usart3Printf("t0.txt=\"DS18B20 Success\"\xFF\xFF\xFF");
+        
+        HAL_Delay(100);
+        
     }
     else
     {
-        printf("DS18B20 初始化失败\r\n");
+        LoRaPrintf("DS18B20 is initialized failed\r\n");
         HAL_Delay(100);
         
-//        Usart3Printf("t0.txt=\"DS10B20初始化失败\"\xFF\xFF\xFF");
-        HAL_Delay(500);
+        Usart3Printf("t0.txt=\"DS18B20 is initialized failed\"\xFF\xFF\xFF");
+        HAL_Delay(100);
     }
 }
 
@@ -296,6 +298,10 @@ float Ds18b20_Get_Temp()
 		f_tem = (~s_tem+1) * 0.0625;	
 	else
 		f_tem = s_tem * 0.0625;
-	
+    
+    if(f_tem > 100)
+    {
+        f_tem = 25.0;
+    }
 	return f_tem;
 }

@@ -45,33 +45,45 @@ void ALL_Init(void)
     HAL_UART_Receive_IT(&huart3, (uint8_t *)&Rx3Data, 1);//调用一次串口中断函数
     
     
-    Usart3Printf("page 0\xFF\xFF\xFF");     //回到页面0
-    HAL_Delay(500);
+    Usart3Printf("page 0\xFF\xFF\xFF");     //回到屏幕初始界面
+    HAL_Delay(1000);
     
     TDS_Init();
     
     Ds18b20_Init();
-    
-    DSL.Start += 10;
-    Usart3Printf("t0.txt=\"DS10B20初始化成功\"\xFF\xFF\xFF");
-    Usart3Printf("j0.val=%d\xFF\xFF\xFF", DSL.Start);
-    HAL_Delay(500);
+    Init_Progress(20);
     
     ESP8266_Init();
     
     PCD_Init();
     
     LoRa_Init();
+    
 }
 
 
 void LoRa_Init(void)
 {
-    printf("%sLoRa初始化成功\r\n","@");
+    LoRaPrintf("LoRa初始化成功");
+    HAL_Delay(500);
     
     DSL.Start = 100;
     Usart3Printf("t0.txt=\"LoRa初始化成功\"\xFF\xFF\xFFj0.val=%d\xFF\xFF\xFF", DSL.Start);
     
-    HAL_Delay(500);
+    HAL_Delay(700);
 }
+
+
+void Init_Progress(unsigned int Progress)
+{
+    DSL.Start += Progress;
+    
+    Usart3Printf("j0.val=%d\xFF\xFF\xFF", DSL.Start);
+    
+    HAL_Delay(1000);
+}
+
+
+
+
 
