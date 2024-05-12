@@ -326,13 +326,25 @@ void Value_StartTask(void *argument)
   {
       DSL.Tem = Ds18b20_Get_Temp();
       TDS_GetValue();
+      
 //    printf("温度：%f°C",DSL.Tem);
       
-      sprintf(ESP8266_message,"{\"status\": \"action\",\"dispenser_id\":%d,\"temperature\":%0.1f,\
+      sprintf(ESP8266_message,"{\"status\": \"Action\",\"dispenser_id\":%d,\"temperature\":%0.1f,\
       \"tds\":%0.1f,\"flow\":%s}",DSL.ID,DSL.Tem,DSL.Tds,DSL.Flow? "true" : "false");
       ESP8266_SendData(ESP8266_message);
       
       Usart3Printf("t1.txt=\"%0.2f\"\xff\xff\xfft2.txt=\"%0.2f\"\xff\xff\xff",DSL.Tem,DSL.Tds);
+      
+      if(DSL.Tds>=85)
+      {
+        Usart3Printf("main.t2.pco=RED\xff\xff\xff");
+      }
+      else
+      {
+        Usart3Printf("main.t2.pco=BLACK\xff\xff\xff");
+      }
+      
+      LoRaPrintf("status: action,temperature:%0.1f,tds:%0.1f",DSL.Tem,DSL.Tds);
       
       osDelay(1000);
       HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_DMABuffer,(NUM_CHANNELS*NUM_SAMPLES_PER_CHANNEL)*2);  //启动ADC转换和DMA数据传输

@@ -60,7 +60,7 @@ int fgetc(FILE *f)
 //==============================================================================
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    UNUSED(huart);
+//    UNUSED(huart);
     if(huart->Instance == huart1.Instance)
     {
         if(ESP8266_struct.ESP_cnt >= sizeof(ESP8266_struct.ESP_usartbuf))
@@ -94,41 +94,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 osSemaphoreRelease(WiFi_BinarySemHandle);   //信号量的计数值增加1
             }
         }
-        
-//        if (Uart2_RxCnt >= sizeof(Rx2Buff) - 1)  // 溢出判断
-//        {
-//            Uart2_RxCnt = 0;
-//            HAL_UART_Transmit(&huart2, (uint8_t *)"数据溢出", 10, 0xFFFF);
-//        }
-//        else
-//        {
-//            if (Rx2Data == 0xff)  // 判断是否为包头的第一个字节
-//            {
-//                if (HMI_Flag == 0 && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 如果前一个字节也是包头的一部分
-//                {
-//                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-//                }
-//                else if (HMI_Flag == 0)  // 第一个包头字节，开始接收数据
-//                {
-//                    Uart2_RxCnt = 0;
-//                    Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-//                    HMI_Flag = 1;
-//                }
-//            }
-//            else if (Rx2Data == 0xff && Rx2Buff[Uart2_RxCnt - 1] == 0xff)  // 包头的第二个字节
-//            {
-//                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-//            }
-//            else if (Rx2Data == 0x0a && Rx2Buff[Uart2_RxCnt - 1] == 0x0d && HMI_Flag == 1)  // 检测到包尾
-//            {
-//                Rx2Buff[Uart2_RxCnt++] = Rx2Data;
-//                Rx2Buff[Uart2_RxCnt] = '\0';  // 在包尾后加上字符串结束符
-//                HMI_Flag = 0;  // 标记数据包结束
 
-//                osSemaphoreRelease(WiFi_BinarySemHandle);  // 信号量的计数值增加1
-//            }
-//        }
-        
         HAL_UART_Receive_IT(&huart2, (uint8_t *)&Rx2Data, 1);   //再开启接收中断
     }
     if(huart->Instance == huart3.Instance)
@@ -244,7 +210,7 @@ void LoRaPrintf(const char *format, ...)
 //==============================================================================
 void HMI_Handle(void)
 {
-    printf("HMIBuff = \"%s\"\r\n",Rx3Buff); // 使用双引号包裹字符串，方便观察是否有额外的字符
+    LoRaPrintf("HMIBuff = \"%s\"",Rx3Buff); // 使用双引号包裹字符串，方便观察是否有额外的字符
     
     
     // 检查 Rx3Buff 中的内容是否为空
@@ -283,7 +249,7 @@ void HMI_Handle(void)
     // 如果 Rx3Buff 不是以上任何一种情况，打印 "未知数据"
     else
     {
-        printf("串口屏未知数据\n");
+        LoRaPrintf("串口屏未知数据");
     }
     
     // 处理完数据后清空数组
@@ -321,12 +287,28 @@ void WiFi_Handle(void)
             if (motorValue == 0) 
             {
                 // "motor" 字段的值为 0，打印 "关"
-                printf("Motor status: 关\r\n");
+                LoRaPrintf("Motor status: 关");
+                
+                DSL.Flow = false;
+                YFS401_Stop();      //关闭YFS401水流器
+                HAL_Delay(100);     //延时避免卡死
+                HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_SET);      //继电器关
+                HAL_Delay(100);     //延时避免卡死
+                
+                char amount_message[50];
+                sprintf(amount_message,"{\"dispenser_id\":%d,\"APP\":\"%d\",\"amount\":%.1lf}",DSL.ID,true,golbal_flow.acculat);     //结算余额
+                ESP8266_SendData(amount_message);
+                
             } 
             else if (motorValue == 1) 
             {
                 // "motor" 字段的值为 1，打印 "开"
-                printf("Motor status: 开\r\n");
+                LoRaPrintf("Motor status: 开");
+                
+                DSL.Flow = true;
+                YFS401_Start();     //启动YFS401水流器
+                HAL_GPIO_WritePin(relay_GPIO_Port,relay_Pin,GPIO_PIN_RESET);      //继电器开
+                
             }
         }
         else
@@ -346,14 +328,14 @@ void WiFi_Handle(void)
                 
                 if(strcmp((const char*)userValue, "None") == 0)
                 {
-                    printf("Unknown user\r\n");
+                    LoRaPrintf("Unknown user");
                 }
                 else
                 {
                     if(DSL.Mode == 0)
                     {
                         DSL.Mode = 1;   //设置进入用户模式
-                        printf("Enter user operation mode\r\n");
+                        LoRaPrintf("Enter user operation mode");
                         strcpy(UserID, CardID);     //将用户卡复制，在后面进行验证
                     }
                     
